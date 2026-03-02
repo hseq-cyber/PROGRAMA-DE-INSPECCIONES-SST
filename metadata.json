@@ -1,0 +1,7 @@
+{
+  "name": "METALPREST SAS - SST Inspect Pro",
+  "description": "Sistema profesional de gestión de inspecciones SST para METALPREST SAS con dashboard de KPIs, cronogramas automáticos y seguimiento de hallazgos.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
