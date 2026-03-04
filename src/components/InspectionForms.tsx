@@ -60,14 +60,18 @@ export default function InspectionForms() {
           // Fallback schedule for demo
           setSchedule([
             { id: 1, type_id: 1, type_name: "Inspección de Extintores", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Coordinador SST' },
-            { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' }
+            { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' },
+            { id: 3, type_id: 3, type_name: "Inspección General de Áreas", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Supervisor' },
+            { id: 4, type_id: 4, type_name: "Inspección de Sustancias Químicas", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Ingeniero Químico' }
           ]);
         }
       })
       .catch(() => {
         setSchedule([
           { id: 1, type_id: 1, type_name: "Inspección de Extintores", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Coordinador SST' },
-          { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' }
+          { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' },
+          { id: 3, type_id: 3, type_name: "Inspección General de Áreas", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Supervisor' },
+          { id: 4, type_id: 4, type_name: "Inspección de Sustancias Químicas", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Ingeniero Químico' }
         ]);
       });
   }, []);
@@ -125,6 +129,8 @@ export default function InspectionForms() {
       });
       if (response.ok) {
         setIsSuccess(true);
+      } else {
+        alert('Error al guardar la inspección. Por favor verifique los datos e intente de nuevo.');
       }
     } catch (error) {
       console.error(error);
@@ -146,6 +152,8 @@ export default function InspectionForms() {
       { label: 'Agente', key: 'Agente', type: 'select', options: ['', 'PQS', 'Solkaflan', 'CO2', 'Agua'], width: 'w-28' },
       { label: 'Capac.', key: 'Capacidad', type: 'text', width: 'w-20' },
       { label: 'Ubicación', key: 'Ubicación', type: 'text', width: 'w-40' },
+      { label: 'F. Recarga', key: 'Fecha Recarga', type: 'date', width: 'w-32' },
+      { label: 'P. Recarga', key: 'Proxima Recarga', type: 'date', width: 'w-32' },
     ];
     
     const updateExtinguisher = (extIdx: number, item: string, value: any) => {
@@ -240,6 +248,13 @@ export default function InspectionForms() {
                         >
                           {col.options?.map(opt => <option key={opt} value={opt}>{opt || '-'}</option>)}
                         </select>
+                      ) : col.type === 'date' ? (
+                        <input 
+                          type="date"
+                          className="w-full p-1.5 text-[10px] font-medium rounded border border-transparent hover:border-slate-200 focus:border-indigo-500 outline-none bg-transparent transition-all"
+                          value={ext[col.key] || ''}
+                          onChange={(e) => updateExtinguisher(extIdx, col.key, e.target.value)}
+                        />
                       ) : (
                         <input 
                           type="text"

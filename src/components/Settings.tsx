@@ -19,7 +19,28 @@ export default function Settings() {
   const [newType, setNewType] = useState({ name: '', frequency: 'monthly', responsible: '' });
 
   useEffect(() => {
-    fetch('/api/inspection-types').then(res => res.json()).then(setTypes);
+    fetch('/api/inspection-types')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setTypes(data);
+        } else {
+          setTypes([
+            { id: 1, name: "Inspección de Extintores", frequency: "monthly", responsible: "Coordinador SST" },
+            { id: 2, name: "Inspección de Botiquín", frequency: "quarterly", responsible: "Brigadista" },
+            { id: 3, name: "Inspección General de Áreas", frequency: "monthly", responsible: "Supervisor" },
+            { id: 4, name: "Inspección de Sustancias Químicas", frequency: "semiannual", responsible: "Ingeniero Químico" }
+          ]);
+        }
+      })
+      .catch(() => {
+        setTypes([
+          { id: 1, name: "Inspección de Extintores", frequency: "monthly", responsible: "Coordinador SST" },
+          { id: 2, name: "Inspección de Botiquín", frequency: "quarterly", responsible: "Brigadista" },
+          { id: 3, name: "Inspección General de Áreas", frequency: "monthly", responsible: "Supervisor" },
+          { id: 4, name: "Inspección de Sustancias Químicas", frequency: "semiannual", responsible: "Ingeniero Químico" }
+        ]);
+      });
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {

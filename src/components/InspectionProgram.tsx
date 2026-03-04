@@ -41,14 +41,18 @@ export default function InspectionProgram() {
           // Fallback schedule
           setSchedule([
             { id: 1, type_id: 1, type_name: "Inspección de Extintores", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Coordinador SST' },
-            { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' }
+            { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' },
+            { id: 3, type_id: 3, type_name: "Inspección General de Áreas", scheduled_date: format(addMonths(new Date(), 2), 'yyyy-MM-dd'), status: 'pending', responsible: 'Supervisor' },
+            { id: 4, type_id: 4, type_name: "Inspección de Sustancias Químicas", scheduled_date: format(addMonths(new Date(), 3), 'yyyy-MM-dd'), status: 'pending', responsible: 'Ingeniero Químico' }
           ]);
         }
       })
       .catch(() => {
         setSchedule([
           { id: 1, type_id: 1, type_name: "Inspección de Extintores", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Coordinador SST' },
-          { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' }
+          { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' },
+          { id: 3, type_id: 3, type_name: "Inspección General de Áreas", scheduled_date: format(addMonths(new Date(), 2), 'yyyy-MM-dd'), status: 'pending', responsible: 'Supervisor' },
+          { id: 4, type_id: 4, type_name: "Inspección de Sustancias Químicas", scheduled_date: format(addMonths(new Date(), 3), 'yyyy-MM-dd'), status: 'pending', responsible: 'Ingeniero Químico' }
         ]);
       });
 
@@ -81,13 +85,18 @@ export default function InspectionProgram() {
     const response = await fetch('/api/schedule', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newSchedule)
+      body: JSON.stringify({
+        ...newSchedule,
+        type_id: Number(newSchedule.type_id)
+      })
     });
     if (response.ok) {
       const data = await fetch('/api/schedule').then(res => res.json());
       setSchedule(data);
       setIsModalOpen(false);
       setNewSchedule({ type_id: '', scheduled_date: format(new Date(), 'yyyy-MM-dd'), frequency: 'once' });
+    } else {
+      alert('Error al guardar la programación. Por favor intente de nuevo.');
     }
   };
 

@@ -9,16 +9,18 @@ import {
   ChevronRight,
   LogOut,
   Settings,
-  Bell
+  Bell,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Dashboard from './components/Dashboard';
 import InspectionProgram from './components/InspectionProgram';
 import InspectionForms from './components/InspectionForms';
 import FindingsTracking from './components/FindingsTracking';
+import InspectionHistory from './components/InspectionHistory';
 import SettingsModule from './components/Settings';
 
-type Tab = 'dashboard' | 'program' | 'forms' | 'findings' | 'settings';
+type Tab = 'dashboard' | 'program' | 'forms' | 'findings' | 'history' | 'settings';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -28,6 +30,7 @@ export default function App() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'program', label: 'Programa de Inspecciones', icon: Calendar },
     { id: 'forms', label: 'Formularios de Inspección', icon: ClipboardCheck },
+    { id: 'history', label: 'Historial de Inspecciones', icon: FileText },
     { id: 'findings', label: 'Seguimiento de Hallazgos', icon: AlertCircle },
     { id: 'settings', label: 'Configuración', icon: Settings },
   ];
@@ -134,6 +137,7 @@ export default function App() {
               {activeTab === 'dashboard' && <Dashboard />}
               {activeTab === 'program' && <InspectionProgram />}
               {activeTab === 'forms' && <InspectionForms />}
+              {activeTab === 'history' && <InspectionHistory />}
               {activeTab === 'findings' && <FindingsTracking />}
               {activeTab === 'settings' && <SettingsModule />}
             </motion.div>
