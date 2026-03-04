@@ -151,35 +151,42 @@ async function startServer() {
   });
 
   app.post("/api/schedule", (req, res) => {
-    const { type_id, scheduled_date, frequency } = req.body;
-    
-    const transaction = db.transaction(() => {
-      const insert = db.prepare("INSERT INTO inspection_schedule (type_id, scheduled_date) VALUES (?, ?)");
-      insert.run(type_id, scheduled_date);
+    try {
+      const { type_id, scheduled_date, frequency } = req.body;
+      if (!type_id || !scheduled_date) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      const transaction = db.transaction(() => {
+        const insert = db.prepare("INSERT INTO inspection_schedule (type_id, scheduled_date) VALUES (?, ?)");
+        insert.run(type_id, scheduled_date);
 
-      if (frequency && frequency !== 'once') {
-        let currentDate = new Date(scheduled_date);
-        const monthsToAdd = {
-          'monthly': 1,
-          'bimonthly': 2,
-          'quarterly': 3,
-          'semiannual': 6,
-          'annual': 12
-        }[frequency as string] || 0;
+        if (frequency && frequency !== 'once') {
+          let currentDate = new Date(scheduled_date + 'T12:00:00'); // Use noon to avoid timezone shifts
+          const monthsToAdd = {
+            'monthly': 1,
+            'bimonthly': 2,
+            'quarterly': 3,
+            'semiannual': 6,
+            'annual': 12
+          }[frequency as string] || 0;
 
-        if (monthsToAdd > 0) {
-          // Generate for the next 12 months
-          for (let i = 1; i < (12 / monthsToAdd); i++) {
-            currentDate.setMonth(currentDate.getMonth() + monthsToAdd);
-            const nextDate = currentDate.toISOString().split('T')[0];
-            insert.run(type_id, nextDate);
+          if (monthsToAdd > 0) {
+            for (let i = 1; i < (12 / monthsToAdd); i++) {
+              currentDate.setMonth(currentDate.getMonth() + monthsToAdd);
+              const nextDate = currentDate.toISOString().split('T')[0];
+              insert.run(type_id, nextDate);
+            }
           }
         }
-      }
-    });
+      });
 
-    transaction();
-    res.json({ success: true });
+      transaction();
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Error creating schedule:", err);
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.post("/api/inspections", (req, res) => {
@@ -272,8 +279,12 @@ async function startServer() {
   });
 
   app.delete("/api/schedule/:id", (req, res) => {
-    db.prepare("DELETE FROM inspection_schedule WHERE id = ?").run(req.params.id);
-    res.json({ success: true });
+    try {
+      db.prepare("DELETE FROM inspection_schedule WHERE id = ?").run(req.params.id);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.patch("/api/schedule/:id", (req, res) => {

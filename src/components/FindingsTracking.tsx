@@ -27,19 +27,17 @@ export default function FindingsTracking() {
 
   useEffect(() => {
     fetch('/api/findings')
-      .then(res => res.ok ? res.json() : [])
+      .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setFindings(data);
-        } else {
-          // Fallback findings for demo
-          setFindings([
-            { id: 1, inspection_id: 1, description: 'Extintor #045 con presión baja', risk_level: 'High', action_plan: 'Recargar extintor de inmediato', responsible: 'Mantenimiento', due_date: format(new Date(), 'yyyy-MM-dd'), status: 'Open', inspection_type: 'Extintores' },
-            { id: 2, inspection_id: 2, description: 'Botiquín sin gasas estériles', risk_level: 'Medium', action_plan: 'Comprar insumos faltantes', responsible: 'Compras', due_date: format(new Date(), 'yyyy-MM-dd'), status: 'In Process', inspection_type: 'Botiquín' }
-          ]);
-        }
+        setFindings(Array.isArray(data) ? data : []);
       })
-      .catch(() => setFindings([]));
+      .catch(() => {
+        // Fallback findings for demo
+        setFindings([
+          { id: 1, inspection_id: 1, description: 'Extintor #045 con presión baja', risk_level: 'High', action_plan: 'Recargar extintor de inmediato', responsible: 'Mantenimiento', due_date: format(new Date(), 'yyyy-MM-dd'), status: 'Open', inspection_type: 'Extintores' },
+          { id: 2, inspection_id: 2, description: 'Botiquín sin gasas estériles', risk_level: 'Medium', action_plan: 'Comprar insumos faltantes', responsible: 'Compras', due_date: format(new Date(), 'yyyy-MM-dd'), status: 'In Process', inspection_type: 'Botiquín' }
+        ]);
+      });
   }, []);
 
   const updateStatus = async (id: number, newStatus: string) => {
@@ -58,6 +56,8 @@ export default function FindingsTracking() {
     const response = await fetch(`/api/findings/${id}`, { method: 'DELETE' });
     if (response.ok) {
       setFindings(findings.filter(f => f.id !== id));
+    } else {
+      alert('Error al eliminar el hallazgo. Por favor intente de nuevo.');
     }
   };
 

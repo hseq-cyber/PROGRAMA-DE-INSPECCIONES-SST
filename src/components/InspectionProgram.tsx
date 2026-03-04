@@ -33,21 +33,12 @@ export default function InspectionProgram() {
 
   useEffect(() => {
     fetch('/api/schedule')
-      .then(res => res.ok ? res.json() : [])
+      .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setSchedule(data);
-        } else {
-          // Fallback schedule
-          setSchedule([
-            { id: 1, type_id: 1, type_name: "Inspección de Extintores", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Coordinador SST' },
-            { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' },
-            { id: 3, type_id: 3, type_name: "Inspección General de Áreas", scheduled_date: format(addMonths(new Date(), 2), 'yyyy-MM-dd'), status: 'pending', responsible: 'Supervisor' },
-            { id: 4, type_id: 4, type_name: "Inspección de Sustancias Químicas", scheduled_date: format(addMonths(new Date(), 3), 'yyyy-MM-dd'), status: 'pending', responsible: 'Ingeniero Químico' }
-          ]);
-        }
+        setSchedule(Array.isArray(data) ? data : []);
       })
       .catch(() => {
+        // Only use fallbacks if fetch fails
         setSchedule([
           { id: 1, type_id: 1, type_name: "Inspección de Extintores", scheduled_date: format(new Date(), 'yyyy-MM-dd'), status: 'pending', responsible: 'Coordinador SST' },
           { id: 2, type_id: 2, type_name: "Inspección de Botiquín", scheduled_date: format(addMonths(new Date(), 1), 'yyyy-MM-dd'), status: 'pending', responsible: 'Brigadista' },
@@ -57,18 +48,9 @@ export default function InspectionProgram() {
       });
 
     fetch('/api/inspection-types')
-      .then(res => res.ok ? res.json() : [])
+      .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setTypes(data);
-        } else {
-          setTypes([
-            { id: 1, name: "Inspección de Extintores", frequency: "monthly", responsible: "Coordinador SST" },
-            { id: 2, name: "Inspección de Botiquín", frequency: "quarterly", responsible: "Brigadista" },
-            { id: 3, name: "Inspección General de Áreas", frequency: "monthly", responsible: "Supervisor" },
-            { id: 4, name: "Inspección de Sustancias Químicas", frequency: "semiannual", responsible: "Ingeniero Químico" }
-          ]);
-        }
+        setTypes(Array.isArray(data) ? data : []);
       })
       .catch(() => {
         setTypes([
@@ -82,6 +64,10 @@ export default function InspectionProgram() {
 
   const handleCreateSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newSchedule.type_id) {
+      alert('Por favor seleccione un tipo de inspección');
+      return;
+    }
     const response = await fetch('/api/schedule', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -105,6 +91,8 @@ export default function InspectionProgram() {
     const response = await fetch(`/api/schedule/${id}`, { method: 'DELETE' });
     if (response.ok) {
       setSchedule(schedule.filter(s => s.id !== id));
+    } else {
+      alert('Error al eliminar la programación. Por favor intente de nuevo.');
     }
   };
 
@@ -373,9 +361,18 @@ export default function InspectionProgram() {
                     return (
                       <div 
                         key={i} 
-                        className={`text-[10px] p-1.5 rounded-lg border truncate font-medium ${status.class}`}
+                        className={`text-[10px] p-1.5 rounded-lg border truncate font-medium flex items-center justify-between group/item ${status.class}`}
                       >
-                        {insp.type_name}
+                        <span className="truncate">{insp.type_name}</span>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSchedule(insp.id);
+                          }}
+                          className="hidden group-hover/item:block p-0.5 hover:bg-black/10 rounded"
+                        >
+                          <X size={10} />
+                        </button>
                       </div>
                     );
                   })}

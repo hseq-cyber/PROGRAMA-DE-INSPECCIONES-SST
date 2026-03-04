@@ -20,18 +20,9 @@ export default function Settings() {
 
   useEffect(() => {
     fetch('/api/inspection-types')
-      .then(res => res.ok ? res.json() : [])
+      .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch'))
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setTypes(data);
-        } else {
-          setTypes([
-            { id: 1, name: "Inspección de Extintores", frequency: "monthly", responsible: "Coordinador SST" },
-            { id: 2, name: "Inspección de Botiquín", frequency: "quarterly", responsible: "Brigadista" },
-            { id: 3, name: "Inspección General de Áreas", frequency: "monthly", responsible: "Supervisor" },
-            { id: 4, name: "Inspección de Sustancias Químicas", frequency: "semiannual", responsible: "Ingeniero Químico" }
-          ]);
-        }
+        setTypes(Array.isArray(data) ? data : []);
       })
       .catch(() => {
         setTypes([
@@ -77,6 +68,8 @@ export default function Settings() {
     const response = await fetch(`/api/inspection-types/${id}`, { method: 'DELETE' });
     if (response.ok) {
       setTypes(types.filter(t => t.id !== id));
+    } else {
+      alert('Error al eliminar el tipo de inspección. Por favor intente de nuevo.');
     }
   };
 
